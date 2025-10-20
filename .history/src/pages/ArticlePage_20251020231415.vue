@@ -29,7 +29,7 @@
           <h1 class="article-title">{{ article.title }}</h1>
           <p class="article-description">{{ article.description }}</p>
           <div class="article-author">
-            <img :src="article.author.avatar" :alt="article.author.name" class="author-avatar" />
+            <img :src="article.author.avatar" :alt="article.author.name" class="author-avatar">
             <div class="author-info">
               <span class="author-name">{{ article.author.name }}</span>
               <span class="author-role">{{ article.author.role }}</span>
@@ -49,10 +49,23 @@
 
         <!-- Article Actions -->
         <div class="article-actions">
-          <ActionButton type="like" :active="isLiked" :count="article.likes" @click="toggleLike" />
-          <ActionButton type="share" @click="shareArticle" />
-          <ActionButton type="bookmark" :active="isBookmarked" @click="toggleBookmark" />
+          <ActionButton
+            type="like"
+            :active="isLiked"
+            :count="article.likes"
+            @click="toggleLike"
+          />
+          <ActionButton
+            type="share"
+            @click="shareArticle"
+          />
+          <ActionButton
+            type="bookmark"
+            :active="isBookmarked"
+            @click="toggleBookmark"
+          />
         </div>
+
       </div>
     </main>
   </div>
@@ -61,19 +74,20 @@
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import Header from '@/components/AppHeader.vue'
-import ActionButton from '@/components/ActionButton.vue'
-import { useNewsStore } from '@/stores/newsStore'
-import { useNewsUtils } from '@/composables/useNewsUtils.js'
+import Header from '../components/Header.vue'
+import ActionButton from '../components/ActionButton.vue'
+import ArticleCard from '../components/ArticleCard.vue'
+import { useNewsApi, useNewsUtils } from '../composables/useNewsApi.js'
 
 const route = useRoute()
-const newsStore = useNewsStore()
-const { formatDate } = useNewsUtils()
 
 const isLiked = ref(false)
 const isBookmarked = ref(false)
 const loading = ref(false)
 const error = ref(null)
+
+const { getArticle } = useNewsApi()
+const { formatDate, formatRelativeDate } = useNewsUtils()
 
 const article = reactive({
   id: null,
@@ -88,55 +102,32 @@ const article = reactive({
   author: {
     name: '',
     role: '',
-    avatar: '',
-  },
+    avatar: ''
+  }
 })
+
 
 const articleId = computed(() => {
   return route.params.id || '1'
 })
-
-const getMockArticle = (id) => {
-  return {
-    id: id,
-    title: 'Заголовок статьи не найден',
-    description: 'К сожалению, статья с таким ID не была найдена.',
-    content: '<p>Содержимое статьи временно недоступно.</p>',
-    image: 'https://via.placeholder.com/800x400?text=Article+Not+Found',
-    category: 'General',
-    publishedAt: new Date(),
-    likes: 0,
-    comments: 0,
-    author: {
-      name: 'Система',
-      role: 'Служба поддержки',
-      avatar: 'https://via.placeholder.com/100x100?text=No+Author',
-    },
-  }
-}
 
 const loadArticle = async () => {
   loading.value = true
   error.value = null
 
   try {
-    let foundArticle = newsStore.articles.find((a) => String(a.id) === articleId.value)
+    const articleData = await getArticle(articleId.value)
 
-    if (!foundArticle) {
-      if (newsStore.articles.length === 0) {
-        await newsStore.fetchTopHeadlines({ pageSize: 20 })
-      }
-      foundArticle = newsStore.articles.find((a) => String(a.id) === articleId.value)
-    }
+    Object.assign(article, articleData)
 
-    Object.assign(article, foundArticle || getMockArticle(articleId.value))
   } catch (err) {
-    error.value = 'Не удалось загрузить статью'
+    error.value = err.message
     console.error('Error loading article:', err)
   } finally {
     loading.value = false
   }
 }
+
 
 const handleSearch = (searchData) => {
   console.log('Search performed:', searchData)
@@ -160,7 +151,7 @@ const shareArticle = () => {
     navigator.share({
       title: article.title,
       text: article.description,
-      url: window.location.href,
+      url: window.location.href
     })
   } else {
     navigator.clipboard.writeText(window.location.href)
@@ -172,14 +163,11 @@ onMounted(() => {
   loadArticle()
 })
 
-watch(
-  () => route.params.id,
-  (newId) => {
-    if (newId) {
-      loadArticle()
-    }
-  },
-)
+watch(() => route.params.id, (newId) => {
+  if (newId) {
+    loadArticle()
+  }
+})
 </script>
 
 <style scoped>
@@ -403,6 +391,7 @@ watch(
   border-color: #3b82f6;
 }
 
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .header-content {
@@ -453,12 +442,8 @@ watch(
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .error-state h2 {

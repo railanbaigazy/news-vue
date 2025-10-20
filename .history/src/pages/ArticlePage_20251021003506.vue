@@ -61,7 +61,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import Header from '@/components/AppHeader.vue'
+import Header from '@/components/Header.vue'
 import ActionButton from '@/components/ActionButton.vue'
 import { useNewsStore } from '@/stores/newsStore'
 import { useNewsUtils } from '@/composables/useNewsUtils.js'

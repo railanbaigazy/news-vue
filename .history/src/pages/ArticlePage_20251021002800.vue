@@ -61,19 +61,20 @@
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import Header from '@/components/AppHeader.vue'
-import ActionButton from '@/components/ActionButton.vue'
-import { useNewsStore } from '@/stores/newsStore'
-import { useNewsUtils } from '@/composables/useNewsUtils.js'
+import Header from '../components/Header.vue'
+import ActionButton from '../components/ActionButton.vue'
+import ArticleCard from '../components/ArticleCard.vue'
+import { useNewsApi, useNewsUtils } from '../composables/useNewsUtils.js'
 
 const route = useRoute()
-const newsStore = useNewsStore()
-const { formatDate } = useNewsUtils()
 
 const isLiked = ref(false)
 const isBookmarked = ref(false)
 const loading = ref(false)
 const error = ref(null)
+
+const { getArticle } = useNewsApi()
+const { formatDate, formatRelativeDate } = useNewsUtils()
 
 const article = reactive({
   id: null,
@@ -96,42 +97,16 @@ const articleId = computed(() => {
   return route.params.id || '1'
 })
 
-const getMockArticle = (id) => {
-  return {
-    id: id,
-    title: 'Заголовок статьи не найден',
-    description: 'К сожалению, статья с таким ID не была найдена.',
-    content: '<p>Содержимое статьи временно недоступно.</p>',
-    image: 'https://via.placeholder.com/800x400?text=Article+Not+Found',
-    category: 'General',
-    publishedAt: new Date(),
-    likes: 0,
-    comments: 0,
-    author: {
-      name: 'Система',
-      role: 'Служба поддержки',
-      avatar: 'https://via.placeholder.com/100x100?text=No+Author',
-    },
-  }
-}
-
 const loadArticle = async () => {
   loading.value = true
   error.value = null
 
   try {
-    let foundArticle = newsStore.articles.find((a) => String(a.id) === articleId.value)
+    const articleData = await getArticle(articleId.value)
 
-    if (!foundArticle) {
-      if (newsStore.articles.length === 0) {
-        await newsStore.fetchTopHeadlines({ pageSize: 20 })
-      }
-      foundArticle = newsStore.articles.find((a) => String(a.id) === articleId.value)
-    }
-
-    Object.assign(article, foundArticle || getMockArticle(articleId.value))
+    Object.assign(article, articleData)
   } catch (err) {
-    error.value = 'Не удалось загрузить статью'
+    error.value = err.message
     console.error('Error loading article:', err)
   } finally {
     loading.value = false
