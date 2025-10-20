@@ -115,7 +115,7 @@ const performSearch = async () => {
       pageSize: 5,
     })
 
-    searchResults.value = newsStore.articles.slice(0, 5)
+    searchResults.value = newsStore.searchResults.articles.slice(0, 5)
 
     emit('search', { query, results: searchResults.value })
   } catch (error) {

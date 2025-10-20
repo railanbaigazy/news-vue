@@ -29,17 +29,16 @@
           <h1 class="article-title">{{ article.title }}</h1>
           <p class="article-description">{{ article.description }}</p>
           <div class="article-author">
-            <img :src="article.author.avatar" :alt="article.author.name" class="author-avatar" />
+            <img :src="article.author.avatar" :alt="article.author" class="author-avatar" />
             <div class="author-info">
-              <span class="author-name">{{ article.author.name }}</span>
-              <span class="author-role">{{ article.author.role }}</span>
+              <span class="author-name">{{ article.author }}</span>
             </div>
           </div>
         </div>
 
         <!-- Article Image -->
         <div class="article-image">
-          <img :src="article.image" :alt="article.title" />
+          <img :src="article.urlToImage" :alt="article.title" />
         </div>
 
         <!-- Article Content -->
@@ -120,13 +119,15 @@ const loadArticle = async () => {
   error.value = null
 
   try {
-    let foundArticle = newsStore.articles.find((a) => String(a.id) === articleId.value)
+    let foundArticle = newsStore.topHeadlines.articles.find((a) => String(a.id) === articleId.value)
 
     if (!foundArticle) {
-      if (newsStore.articles.length === 0) {
-        await newsStore.fetchTopHeadlines({ pageSize: 20 })
-      }
-      foundArticle = newsStore.articles.find((a) => String(a.id) === articleId.value)
+      foundArticle = newsStore.searchResults.articles.find((a) => String(a.id) === articleId.value)
+    }
+
+    if (!foundArticle && newsStore.topHeadlines.articles.length === 0) {
+      await newsStore.fetchTopHeadlines({ pageSize: 20 })
+      foundArticle = newsStore.topHeadlines.articles.find((a) => String(a.id) === articleId.value)
     }
 
     Object.assign(article, foundArticle || getMockArticle(articleId.value))

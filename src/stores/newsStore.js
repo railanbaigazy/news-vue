@@ -1,10 +1,17 @@
 import { defineStore } from 'pinia'
 import { getTopHeadlines, searchNews } from '@/services/newsService'
+import { generateArticleId } from '@/helpers/generateArticleId'
 
 export const useNewsStore = defineStore('news', {
   state: () => ({
-    articles: [],
-    totalResults: 0,
+    topHeadlines: {
+      articles: [],
+      totalResults: 0,
+    },
+    searchResults: {
+      articles: [],
+      totalResults: 0,
+    },
     loading: false,
     error: null,
     country: 'us',
@@ -39,8 +46,14 @@ export const useNewsStore = defineStore('news', {
           params.pageSize,
         )
 
-        this.articles = res.data.articles
-        this.totalResults = res.data.totalResults
+        this.topHeadlines.articles = res.data.articles.map((article) => ({
+          ...article,
+          id: generateArticleId(article),
+          category: params.category || 'Top Headlines',
+        }))
+
+        this.topHeadlines.totalResults = res.data.totalResults
+
         this.country = params.country
         this.category = params.category
         this.sources = params.sources
@@ -72,25 +85,18 @@ export const useNewsStore = defineStore('news', {
           filters.pageSize || this.pageSize,
         )
 
-        this.articles = res.data.articles
-        this.totalResults = res.data.totalResults
+        this.searchResults.articles = res.data.articles.map((article) => ({
+          ...article,
+          id: generateArticleId(article),
+          category: 'Searched',
+        }))
+
+        this.searchResults.totalResults = res.data.totalResults
         this.page = filters.page || 1
       } catch (err) {
         this.error = err.response?.data?.message || err.message
       } finally {
         this.loading = false
-      }
-    },
-
-    async loadMore(isSearch = false) {
-      if (this.articles.length >= this.totalResults) return
-
-      this.page++
-
-      if (isSearch) {
-        await this.searchArticles({ page: this.page })
-      } else {
-        await this.fetchTopHeadlines({ page: this.page })
       }
     },
   },

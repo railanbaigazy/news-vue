@@ -1,7 +1,7 @@
 <template>
   <article class="article-card" :class="cardClasses">
-    <div class="article-image" v-if="article.image">
-      <img :src="article.image" :alt="article.title" @error="handleImageError" />
+    <div class="article-image" v-if="article.urlToImage">
+      <img :src="article.urlToImage" :alt="article.title" @error="handleImageError" />
       <div class="article-category" v-if="article.category">
         {{ article.category }}
       </div>
@@ -11,7 +11,7 @@
       <div class="article-meta">
         <span class="article-date">{{ formatDate(article.publishedAt) }}</span>
         <span class="article-author" v-if="article.author">
-          {{ article.author.name }}
+          {{ article.author }}
         </span>
       </div>
 
@@ -28,14 +28,35 @@
       <div class="article-footer">
         <div class="article-stats">
           <span class="stat-item" v-if="article.likes !== undefined">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20.84 4.61C20.33 4.1 19.69 3.84 19 3.84C18.31 3.84 17.67 4.1 17.16 4.61L12 9.77L6.84 4.61C6.33 4.1 5.69 3.84 5 3.84C4.31 3.84 3.67 4.1 3.16 4.61C2.65 5.12 2.39 5.76 2.39 6.45C2.39 7.14 2.65 7.78 3.16 8.29L8.29 13.42L3.16 18.55C2.65 19.06 2.39 19.7 2.39 20.39C2.39 21.08 2.65 21.72 3.16 22.23C3.67 22.74 4.31 23 5 23C5.69 23 6.33 22.74 6.84 22.23L12 17.06L17.16 22.23C17.67 22.74 18.31 23 19 23C19.69 23 20.33 22.74 20.84 22.23C21.35 21.72 21.61 21.08 21.61 20.39C21.61 19.7 21.35 19.06 20.84 18.55L15.71 13.42L20.84 8.29C21.35 7.78 21.61 7.14 21.61 6.45C21.61 5.76 21.35 5.12 20.84 4.61Z" fill="currentColor"/>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20.84 4.61C20.33 4.1 19.69 3.84 19 3.84C18.31 3.84 17.67 4.1 17.16 4.61L12 9.77L6.84 4.61C6.33 4.1 5.69 3.84 5 3.84C4.31 3.84 3.67 4.1 3.16 4.61C2.65 5.12 2.39 5.76 2.39 6.45C2.39 7.14 2.65 7.78 3.16 8.29L8.29 13.42L3.16 18.55C2.65 19.06 2.39 19.7 2.39 20.39C2.39 21.08 2.65 21.72 3.16 22.23C3.67 22.74 4.31 23 5 23C5.69 23 6.33 22.74 6.84 22.23L12 17.06L17.16 22.23C17.67 22.74 18.31 23 19 23C19.69 23 20.33 22.74 20.84 22.23C21.35 21.72 21.61 21.08 21.61 20.39C21.61 19.7 21.35 19.06 20.84 18.55L15.71 13.42L20.84 8.29C21.35 7.78 21.61 7.14 21.61 6.45C21.61 5.76 21.35 5.12 20.84 4.61Z"
+                fill="currentColor"
+              />
             </svg>
             {{ formatNumber(article.likes) }}
           </span>
           <span class="stat-item" v-if="article.comments !== undefined">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
             {{ formatNumber(article.comments) }}
           </span>
@@ -70,21 +91,21 @@ import ActionButton from './ActionButton.vue'
 const props = defineProps({
   article: {
     type: Object,
-    required: true
+    required: true,
   },
   variant: {
     type: String,
     default: 'default',
-    validator: (value) => ['default', 'featured', 'compact', 'minimal'].includes(value)
+    validator: (value) => ['default', 'featured', 'compact', 'minimal'].includes(value),
   },
   showActions: {
     type: Boolean,
-    default: true
+    default: true,
   },
   maxDescriptionLength: {
     type: Number,
-    default: 150
-  }
+    default: 150,
+  },
 })
 
 const emit = defineEmits(['like', 'bookmark', 'click'])
@@ -96,15 +117,15 @@ const imageError = ref(false)
 const cardClasses = computed(() => [
   `article-card--${props.variant}`,
   {
-    'article-card--image-error': imageError.value
-  }
+    'article-card--image-error': imageError.value,
+  },
 ])
 
 const formatDate = (date) => {
   return new Intl.DateTimeFormat('ru-RU', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   }).format(new Date(date))
 }
 
