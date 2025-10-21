@@ -1,26 +1,29 @@
 <template>
   <div class="article-page">
-    <!-- Header -->
     <Header @search="handleSearch" />
 
-    <!-- Main Content -->
     <main class="main-content">
-      <!-- Loading State -->
       <div v-if="loading" class="loading-state">
         <div class="spinner"></div>
         <p>Загружаем статью...</p>
       </div>
 
-      <!-- Error State -->
       <div v-else-if="error" class="error-state">
         <h2>Ошибка загрузки</h2>
         <p>{{ error }}</p>
         <button @click="loadArticle" class="btn btn-primary">Попробовать снова</button>
       </div>
 
-      <!-- Article Content -->
       <div v-else class="content-container">
-        <!-- Article Header -->
+        <div class="back-section">
+          <button @click="goBack" class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Назад
+          </button>
+        </div>
+
         <div class="article-header">
           <div class="article-meta">
             <span class="category">{{ article.category }}</span>
@@ -29,24 +32,20 @@
           <h1 class="article-title">{{ article.title }}</h1>
           <p class="article-description">{{ article.description }}</p>
           <div class="article-author">
-            <img :src="article.author.avatar" :alt="article.author" class="author-avatar" />
             <div class="author-info">
               <span class="author-name">{{ article.author }}</span>
             </div>
           </div>
         </div>
 
-        <!-- Article Image -->
         <div class="article-image">
           <img :src="article.urlToImage" :alt="article.title" />
         </div>
 
-        <!-- Article Content -->
         <div class="article-body">
           <div class="article-text" v-html="article.content"></div>
         </div>
 
-        <!-- Article Actions -->
         <div class="article-actions">
           <ActionButton type="like" :active="isLiked" :count="article.likes" @click="toggleLike" />
           <ActionButton type="share" @click="shareArticle" />
@@ -169,6 +168,14 @@ const shareArticle = () => {
   }
 }
 
+const goBack = () => {
+  if (window.history.length > 1) {
+    window.history.back()
+  } else {
+    router.push('/')
+  }
+}
+
 onMounted(() => {
   loadArticle()
 })
@@ -189,7 +196,6 @@ watch(
   background-color: #ffffff;
 }
 
-/* Header Styles */
 .header {
   background-color: #000000;
   color: white;
@@ -258,7 +264,6 @@ watch(
   color: #000000;
 }
 
-/* Main Content */
 .main-content {
   max-width: 800px;
   margin: 0 auto;
@@ -267,6 +272,30 @@ watch(
 
 .content-container {
   background: white;
+}
+
+.back-section {
+  margin-bottom: 1.5rem;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  color: #475569;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background: #f1f5f9;
+  border-color: #3b82f6;
+  color: #3b82f6;
 }
 
 .article-header {
@@ -311,14 +340,6 @@ watch(
 .article-author {
   display: flex;
   align-items: center;
-  gap: 1rem;
-}
-
-.author-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
 }
 
 .author-info {
@@ -331,12 +352,6 @@ watch(
   color: #111827;
 }
 
-.author-role {
-  color: #6b7280;
-  font-size: 0.875rem;
-}
-
-/* Article Image */
 .article-image {
   margin: 2rem 0;
   border-radius: 0.5rem;
@@ -370,7 +385,6 @@ watch(
   margin-bottom: 1.5rem;
 }
 
-/* Article Actions */
 .article-actions {
   display: flex;
   gap: 1rem;
@@ -404,7 +418,6 @@ watch(
   border-color: #3b82f6;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .header-content {
     padding: 1rem;
@@ -429,9 +442,13 @@ watch(
   .article-actions {
     flex-direction: column;
   }
+
+  .back-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
 }
 
-/* Loading and Error States */
 .loading-state,
 .error-state {
   display: flex;

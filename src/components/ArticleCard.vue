@@ -63,21 +63,28 @@
         </div>
 
         <div class="article-actions" v-if="showActions">
-          <ActionButton
-            type="like"
-            :active="isLiked"
-            :count="article.likes"
-            :show-text="false"
-            size="small"
+          <button
+            class="action-btn like-btn"
+            :class="{ active: isLiked }"
             @click="handleLike"
-          />
-          <ActionButton
-            type="bookmark"
-            :active="isBookmarked"
-            :show-text="false"
-            size="small"
+            title="Лайк"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z" fill="currentColor"/>
+            </svg>
+            <span v-if="article.likes">{{ formatNumber(article.likes) }}</span>
+          </button>
+
+          <button
+            class="action-btn bookmark-btn"
+            :class="{ active: isBookmarked }"
             @click="handleBookmark"
-          />
+            title="Сохранить"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -166,6 +173,9 @@ const handleBookmark = () => {
   transition: all 0.3s ease;
   border: 1px solid #e5e7eb;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .article-card:hover {
@@ -182,6 +192,7 @@ const handleBookmark = () => {
 .article-card--compact {
   display: flex;
   gap: 1rem;
+  flex-direction: row;
 }
 
 .article-card--compact .article-image {
@@ -241,6 +252,9 @@ const handleBookmark = () => {
 
 .article-content {
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .article-meta {
@@ -282,12 +296,14 @@ const handleBookmark = () => {
   color: #6b7280;
   line-height: 1.6;
   margin-bottom: 1rem;
+  flex-grow: 1;
 }
 
 .article-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: auto;
 }
 
 .article-stats {
@@ -309,6 +325,43 @@ const handleBookmark = () => {
   gap: 0.5rem;
 }
 
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  color: #6b7280;
+}
+
+.action-btn:hover {
+  background-color: #f9fafb;
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.action-btn.active {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.like-btn.active {
+  background-color: #ef4444;
+  border-color: #ef4444;
+}
+
+.bookmark-btn.active {
+  background-color: #f59e0b;
+  border-color: #f59e0b;
+}
+
 @media (max-width: 768px) {
   .article-card--compact {
     flex-direction: column;
@@ -327,11 +380,17 @@ const handleBookmark = () => {
     flex-direction: column;
     gap: 1rem;
     align-items: flex-start;
+    margin-top: 1rem;
   }
 
   .article-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .action-btn {
+    padding: 0.75rem;
+    font-size: 0.875rem;
   }
 }
 </style>
