@@ -1,7 +1,12 @@
 <template>
   <article class="article-card" :class="cardClasses">
-    <div class="article-image" v-if="article.urlToImage">
-      <img :src="article.urlToImage" :alt="article.title" @error="handleImageError" />
+    <div class="article-image">
+      <img
+        :src="article.urlToImage || defaultImageUrl"
+        :alt="article.title"
+        @error="handleImageError"
+      />
+
       <div class="article-category" v-if="article.category">
         {{ article.category }}
       </div>
@@ -69,8 +74,17 @@
             @click="handleLike"
             title="Лайк"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z" fill="currentColor"/>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"
+                fill="currentColor"
+              />
             </svg>
             <span v-if="article.likes">{{ formatNumber(article.likes) }}</span>
           </button>
@@ -81,8 +95,20 @@
             @click="handleBookmark"
             title="Сохранить"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M19 21L12 16L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -93,7 +119,6 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import ActionButton from './ActionButton.vue'
 
 const props = defineProps({
   article: {
@@ -116,6 +141,9 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['like', 'bookmark', 'click'])
+
+const defaultImageUrl =
+  'https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg'
 
 const isLiked = ref(false)
 const isBookmarked = ref(false)

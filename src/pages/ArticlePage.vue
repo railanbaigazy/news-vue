@@ -5,22 +5,34 @@
     <main class="main-content">
       <div v-if="loading" class="loading-state">
         <div class="spinner"></div>
-        <p>Загружаем статью...</p>
+        <p>Loading article...</p>
       </div>
 
       <div v-else-if="error" class="error-state">
-        <h2>Ошибка загрузки</h2>
+        <h2>Failed to load</h2>
         <p>{{ error }}</p>
-        <button @click="loadArticle" class="btn btn-primary">Попробовать снова</button>
+        <button @click="loadArticle" class="btn btn-primary">Try again</button>
       </div>
 
       <div v-else class="content-container">
         <div class="back-section">
           <button @click="goBack" class="back-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M19 12H5M12 19L5 12L12 5"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
-            Назад
+            Back
           </button>
         </div>
 
