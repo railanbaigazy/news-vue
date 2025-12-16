@@ -102,6 +102,7 @@ const categories = reactive([
   { id: 5, name: 'Science', path: '/category/science' },
   { id: 6, name: 'Sports', path: '/category/sports' },
   { id: 7, name: 'Technology', path: '/category/technology' },
+  { id: 8, name: 'Bookmarks', path: '/bookmarks' },
 ])
 
 const performSearch = async () => {

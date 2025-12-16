@@ -75,13 +75,15 @@ import Header from '@/components/AppHeader.vue'
 import ActionButton from '@/components/ActionButton.vue'
 import { useNewsStore } from '@/stores/newsStore'
 import { useNewsUtils } from '@/composables/useNewsUtils.js'
+import { useFavoritesStore } from '@/stores/favoritesStore'
 
 const route = useRoute()
 const newsStore = useNewsStore()
 const { formatDate } = useNewsUtils()
+const favoritesStore = useFavoritesStore()
 
 const isLiked = ref(false)
-const isBookmarked = ref(false)
+const isBookmarked = computed(() => favoritesStore.isFavorite(article.id))
 const loading = ref(false)
 const error = ref(null)
 
@@ -164,7 +166,7 @@ const toggleLike = () => {
 }
 
 const toggleBookmark = () => {
-  isBookmarked.value = !isBookmarked.value
+  favoritesStore.toggle(article)
 }
 
 const shareArticle = () => {
@@ -189,6 +191,7 @@ const goBack = () => {
 }
 
 onMounted(() => {
+  favoritesStore.hydrate()
   loadArticle()
 })
 

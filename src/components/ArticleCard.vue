@@ -118,7 +118,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useFavoritesStore } from '@/stores/favoritesStore'
 
 const props = defineProps({
   article: {
@@ -142,11 +143,14 @@ const props = defineProps({
 
 const emit = defineEmits(['like', 'bookmark', 'click'])
 
+const favoritesStore = useFavoritesStore()
+onMounted(() => favoritesStore.hydrate())
+
 const defaultImageUrl =
   'https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg'
 
 const isLiked = ref(false)
-const isBookmarked = ref(false)
+const isBookmarked = computed(() => favoritesStore.isFavorite(props.article.id))
 const imageError = ref(false)
 
 const cardClasses = computed(() => [
@@ -188,8 +192,8 @@ const handleLike = () => {
 }
 
 const handleBookmark = () => {
-  isBookmarked.value = !isBookmarked.value
-  emit('bookmark', { article: props.article, bookmarked: isBookmarked.value })
+  const bookmarked = favoritesStore.toggle(props.article)
+  emit('bookmark', { article: props.article, bookmarked })
 }
 </script>
 
