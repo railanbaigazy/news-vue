@@ -19,9 +19,10 @@
         </router-link>
       </nav>
 
-      <div class="search-container">
-        <div class="search-input-wrapper" :class="{ active: isSearchActive }">
+      <div class="search-container" ref="searchContainer">
+        <div class="search-input-wrapper" :class="{ active: isSearchActive }" @mousedown.prevent="activateSearch">
           <input
+            ref="searchInput"
             v-model="searchQuery"
             @focus="isSearchActive = true"
             @blur="handleSearchBlur"
@@ -30,7 +31,7 @@
             placeholder="Поиск новостей..."
             class="search-input"
           />
-          <button class="search-btn" @click="performSearch">
+          <button class="search-btn" type="button" @mousedown.prevent="activateSearch" @click="performSearch">
             <svg
               width="20"
               height="20"
@@ -79,7 +80,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNewsUtils } from '@/composables/useNewsUtils'
 import { useNewsStore } from '@/stores/newsStore'
@@ -93,6 +94,8 @@ const { formatDate } = useNewsUtils()
 const isSearchActive = ref(false)
 const searchQuery = ref('')
 const searchResults = ref([])
+const searchInput = ref(null)
+const searchContainer = ref(null)
 
 const categories = reactive([
   { id: 1, name: 'All', path: '/' },
@@ -137,7 +140,19 @@ const resetSearch = () => {
 }
 
 const handleSearchBlur = () => {
-  setTimeout(resetSearch, 200)
+  setTimeout(() => {
+    const inside = searchContainer.value?.contains(document.activeElement)
+    if (!inside) {
+      resetSearch()
+    }
+  }, 120)
+}
+
+const activateSearch = () => {
+  isSearchActive.value = true
+  nextTick(() => {
+    searchInput.value?.focus()
+  })
 }
 
 watch(searchQuery, async (newQuery) => {
@@ -160,7 +175,6 @@ watch(searchQuery, async (newQuery) => {
 }
 
 .header-content {
-  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -210,15 +224,25 @@ watch(searchQuery, async (newQuery) => {
 .search-input-wrapper {
   display: flex;
   align-items: center;
-  background-color: white;
-  border-radius: 2rem;
-  padding: 0.5rem 1rem;
-  transition: all 0.3s ease;
-  min-width: 300px;
+  background: #ffffff;
+  border-radius: 999px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  padding: 0.45rem 0.75rem;
+  width: 70px;
+  height: 44px;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  position: relative;
+  transition: width 0.4s ease, padding 0.4s ease, box-shadow 0.3s ease, height 0.3s ease;
+  cursor: text;
 }
 
 .search-input-wrapper.active {
-  box-shadow: 0 0 0 2px #3b82f6;
+  width: 320px;
+  height: auto;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 0 0 2px #3b82f6, 0 6px 14px rgba(0, 0, 0, 0.12);
 }
 
 .search-input {
@@ -226,8 +250,22 @@ watch(searchQuery, async (newQuery) => {
   outline: none;
   background: transparent;
   flex: 1;
-  padding: 0.5rem;
+  padding: 0.4rem 0.5rem;
   font-size: 0.875rem;
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: width 0.35s ease, opacity 0.3s ease;
+  color: #111827;
+  min-width: 0;
+  caret-color: #3b82f6;
+}
+
+.search-input-wrapper.active .search-input {
+  width: 100%;
+  opacity: 1;
+  pointer-events: auto;
+  padding-right: 2rem; /* reserve space for the icon */
 }
 
 .search-input::placeholder {
@@ -235,12 +273,29 @@ watch(searchQuery, async (newQuery) => {
 }
 
 .search-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   color: #6b7280;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, left 0.3s ease, right 0.3s ease, transform 0.3s ease;
+  z-index: 2;
+}
+
+.search-input-wrapper.active .search-btn {
+  left: auto;
+  right: 10px;
+  transform: translateY(-50%);
+  color: #3b82f6;
 }
 
 .search-btn:hover {
@@ -249,6 +304,8 @@ watch(searchQuery, async (newQuery) => {
 
 .search-btn svg {
   color: currentColor;
+  width: 18px;
+  height: 18px;
 }
 
 .search-results {
@@ -258,6 +315,9 @@ watch(searchQuery, async (newQuery) => {
   right: 0;
   background: white;
   border: 1px solid #e5e7eb;
+  color: #111827;
+  min-width: 0;
+  caret-color: #3b82f6;
   border-radius: 0.5rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   z-index: 1000;
@@ -321,7 +381,14 @@ watch(searchQuery, async (newQuery) => {
   }
 
   .search-input-wrapper {
-    min-width: 250px;
+    width: 100%;
+    max-width: 360px;
+    height: auto;
+  }
+
+  .search-input-wrapper.active {
+    width: 100%;
+    max-width: 360px;
   }
 }
 </style>

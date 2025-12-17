@@ -22,6 +22,19 @@ export const useNewsStore = defineStore('news', {
     pageSize: 20,
   }),
 
+  getters: {
+    hasTopHeadlines: (state) => state.topHeadlines.articles.length > 0,
+    hasSearchResults: (state) => state.searchResults.articles.length > 0,
+    totalPages: (state) => {
+      const size = state.pageSize || 1
+      return state.topHeadlines.totalResults ? Math.ceil(state.topHeadlines.totalResults / size) : 0
+    },
+    pagedTopHeadlines: (state) => (page = state.page, pageSize = state.pageSize) => {
+      const start = (page - 1) * pageSize
+      return state.topHeadlines.articles.slice(start, start + pageSize)
+    },
+  },
+
   actions: {
     async fetchTopHeadlines(filters = {}) {
       this.loading = true

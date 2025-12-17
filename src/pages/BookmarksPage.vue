@@ -4,8 +4,12 @@
 
     <main class="main-content">
       <div class="page-heading">
-        <h1>Bookmarks</h1>
-        <p class="subheading">Saved news you want to return to</p>
+        <router-link class="stats-link" to="/bookmarks/stats">View stats</router-link>
+        <div class="heading-main">
+          <h1>Bookmarks</h1>
+          <p class="subheading">Saved news you want to return to</p>
+        </div>
+        <router-view />
       </div>
 
       <template v-if="bookmarks.length === 0">
@@ -60,8 +64,16 @@ const handleBookmark = ({ article, bookmarked }) => {
 }
 
 .page-heading {
+  position: relative;
   margin-bottom: 1.5rem;
   text-align: center;
+}
+
+.heading-main {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
 }
 
 .page-heading h1 {
@@ -74,6 +86,36 @@ const handleBookmark = ({ article, bookmarked }) => {
 .subheading {
   color: #6b7280;
   font-weight: 500;
+}
+
+.stats-link {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #3b82f6;
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.stats-link:hover {
+  background: #3b82f6;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .page-heading {
+    padding-right: 0;
+  }
+
+  .stats-link {
+    position: static;
+    display: inline-block;
+    margin-top: 0.75rem;
+  }
 }
 
 .articles-grid {

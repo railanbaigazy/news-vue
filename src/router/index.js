@@ -1,7 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import ArticlePage from '@/pages/ArticlePage.vue'
-import HomePage from '@/pages/HomePage.vue'
-import BookmarksPage from '@/pages/BookmarksPage.vue'
+import { useFavoritesStore } from '@/stores/favoritesStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -9,25 +7,51 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomePage,
+      component: () => import('@/pages/HomePage.vue'),
     },
     {
       path: '/category/:category',
       name: 'category',
-      component: HomePage,
+      component: () => import('@/pages/HomePage.vue'),
     },
     {
       path: '/article/:id?',
       name: 'article-id',
-      component: ArticlePage,
+      component: () => import('@/pages/ArticlePage.vue'),
       props: true,
     },
     {
       path: '/bookmarks',
       name: 'bookmarks',
-      component: BookmarksPage,
+      component: () => import('@/pages/BookmarksPage.vue'),
+      children: [
+        {
+          path: 'stats',
+          name: 'bookmarks-stats',
+          component: () => import('@/pages/BookmarkStats.vue'),
+          meta: { requiresFavorites: true },
+        },
+      ],
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('@/pages/NotFoundPage.vue'),
     },
   ],
+})
+
+router.beforeEach((to) => {
+  if (to.meta?.requiresFavorites) {
+    const favoritesStore = useFavoritesStore()
+    favoritesStore.hydrate()
+
+    if (!favoritesStore.count) {
+      return { name: 'bookmarks' }
+    }
+  }
+
+  return true
 })
 
 export default router

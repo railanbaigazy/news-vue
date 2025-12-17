@@ -75,6 +75,7 @@ const currentPage = ref(1)
 
 const articles = computed(() => newsStore.topHeadlines.articles)
 const totalResults = computed(() => newsStore.topHeadlines.totalResults)
+// геттер который есть будто не надо использовать а то поломается
 const totalPages = computed(() => Math.ceil(totalResults.value / pageSize))
 const hasPrevious = computed(() => currentPage.value > 1)
 const hasNext = computed(() => currentPage.value < totalPages.value)
