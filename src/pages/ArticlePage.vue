@@ -63,6 +63,11 @@
           <ActionButton type="share" @click="shareArticle" />
           <ActionButton type="bookmark" :active="isBookmarked" @click="toggleBookmark" />
         </div>
+
+        <!-- Форма комментариев -->
+        <div v-show="!loading && !error" class="comments-section">
+          <CommentForm @submit="handleCommentSubmit" />
+        </div>
       </div>
     </main>
   </div>
@@ -70,14 +75,16 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Header from '@/components/AppHeader.vue'
 import ActionButton from '@/components/ActionButton.vue'
+import CommentForm from '@/components/CommentForm.vue'
 import { useNewsStore } from '@/stores/newsStore'
 import { useNewsUtils } from '@/composables/useNewsUtils.js'
 import { useFavoritesStore } from '@/stores/favoritesStore'
 
 const route = useRoute()
+const router = useRouter()
 const newsStore = useNewsStore()
 const { formatDate } = useNewsUtils()
 const favoritesStore = useFavoritesStore()
@@ -180,6 +187,12 @@ const shareArticle = () => {
     navigator.clipboard.writeText(window.location.href)
     alert('Ссылка скопирована в буфер обмена!')
   }
+}
+
+const handleCommentSubmit = (commentData) => {
+  console.log('Комментарий отправлен:', commentData)
+  // Здесь можно добавить логику сохранения комментария
+  article.comments = (article.comments || 0) + 1
 }
 
 const goBack = () => {
@@ -407,6 +420,12 @@ watch(
   padding: 1.5rem 0;
   border-top: 1px solid #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
+}
+
+.comments-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
 }
 
 .action-btn {
