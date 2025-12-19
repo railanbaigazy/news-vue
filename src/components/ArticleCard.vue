@@ -120,6 +120,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useFavoritesStore } from '@/stores/favoritesStore'
+import { useLikesStore } from '@/stores/likesStore'
 
 const props = defineProps({
   article: {
@@ -144,12 +145,16 @@ const props = defineProps({
 const emit = defineEmits(['like', 'bookmark', 'click'])
 
 const favoritesStore = useFavoritesStore()
-onMounted(() => favoritesStore.hydrate())
+const likesStore = useLikesStore()
+onMounted(() => {
+  favoritesStore.hydrate()
+  likesStore.hydrate()
+})
 
 const defaultImageUrl =
   'https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-image-vector-illustration-isolated-png-image_1694547.jpg'
 
-const isLiked = ref(false)
+const isLiked = computed(() => likesStore.isLiked(props.article.id))
 const isBookmarked = computed(() => favoritesStore.isFavorite(props.article.id))
 const imageError = ref(false)
 
@@ -187,8 +192,8 @@ const handleImageError = () => {
 }
 
 const handleLike = () => {
-  isLiked.value = !isLiked.value
-  emit('like', { article: props.article, liked: isLiked.value })
+  const liked = likesStore.toggle(props.article)
+  emit('like', { article: props.article, liked })
 }
 
 const handleBookmark = () => {
