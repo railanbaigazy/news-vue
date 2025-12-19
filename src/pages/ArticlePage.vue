@@ -59,7 +59,7 @@
         </div>
 
         <div class="article-actions">
-          <ActionButton type="like" :active="isLiked" :count="article.likes" @click="toggleLike" />
+          <ActionButton type="like" :active="isLiked" :count="displayLikes" @click="toggleLike" />
           <ActionButton type="share" @click="shareArticle" />
           <ActionButton type="bookmark" :active="isBookmarked" @click="toggleBookmark" />
         </div>
@@ -82,15 +82,21 @@ import CommentForm from '@/components/CommentForm.vue'
 import { useNewsStore } from '@/stores/newsStore'
 import { useNewsUtils } from '@/composables/useNewsUtils.js'
 import { useFavoritesStore } from '@/stores/favoritesStore'
+import { useLikesStore } from '@/stores/likesStore'
 
 const route = useRoute()
 const router = useRouter()
 const newsStore = useNewsStore()
 const { formatDate } = useNewsUtils()
 const favoritesStore = useFavoritesStore()
+const likesStore = useLikesStore()
 
-const isLiked = ref(false)
+const isLiked = computed(() => likesStore.isLiked(article.id))
 const isBookmarked = computed(() => favoritesStore.isFavorite(article.id))
+const displayLikes = computed(() => {
+  const baseLikes = Number(article.likes) || 0
+  return baseLikes + (likesStore.isLiked(article.id) ? 1 : 0)
+})
 const loading = ref(false)
 const error = ref(null)
 
@@ -164,12 +170,7 @@ const handleSearch = (searchData) => {
 }
 
 const toggleLike = () => {
-  isLiked.value = !isLiked.value
-  if (isLiked.value) {
-    article.likes++
-  } else {
-    article.likes--
-  }
+  likesStore.toggle(article)
 }
 
 const toggleBookmark = () => {
@@ -205,6 +206,7 @@ const goBack = () => {
 
 onMounted(() => {
   favoritesStore.hydrate()
+  likesStore.hydrate()
   loadArticle()
 })
 

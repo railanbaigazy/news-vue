@@ -1,6 +1,9 @@
 import { mount } from '@vue/test-utils'
-import { describe, it, expect } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+import { describe, it, expect, vi } from 'vitest'
 import ArticleCard from '@/components/ArticleCard.vue'
+import { useFavoritesStore } from '@/stores/favoritesStore'
+import { useLikesStore } from '@/stores/likesStore'
 
 const sampleArticle = {
   id: 'source::title::123',
@@ -14,13 +17,24 @@ const sampleArticle = {
   category: 'General',
 }
 
-const mountCard = (overrides = {}) =>
-  mount(ArticleCard, {
+const mountCard = (overrides = {}) => {
+  const pinia = createPinia()
+  setActivePinia(pinia)
+
+  const favoritesStore = useFavoritesStore()
+  favoritesStore.hydrate = vi.fn()
+
+  const likesStore = useLikesStore()
+  likesStore.hydrate = vi.fn()
+
+  return mount(ArticleCard, {
     props: { article: { ...sampleArticle, ...overrides }, showActions: true },
     global: {
+      plugins: [pinia],
       stubs: { RouterLink: { template: '<a><slot /></a>' } },
     },
   })
+}
 
 describe('ArticleCard', () => {
   it('renders title and description', () => {
