@@ -64,8 +64,33 @@
           <ActionButton type="bookmark" :active="isBookmarked" @click="toggleBookmark" />
         </div>
 
-        <!-- Форма комментариев -->
+        <!-- Комментарии -->
         <div v-show="!loading && !error" class="comments-section">
+          <h3 class="comments-title">Комментарии ({{ commentsList.length }})</h3>
+          
+          <!-- Список комментариев -->
+          <div v-if="commentsList.length > 0" class="comments-list">
+            <div
+              v-for="comment in commentsList"
+              :key="comment.id"
+              class="comment-item"
+            >
+              <div class="comment-header">
+                <div class="comment-author">
+                  <strong>{{ comment.name }}</strong>
+                  <span class="comment-email">{{ comment.email }}</span>
+                </div>
+                <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
+              </div>
+              <div class="comment-text">{{ comment.comment }}</div>
+            </div>
+          </div>
+
+          <div v-else class="no-comments">
+            <p>Пока нет комментариев. Будьте первым!</p>
+          </div>
+
+          <!-- Форма комментариев -->
           <CommentForm @submit="handleCommentSubmit" />
         </div>
       </div>
@@ -82,6 +107,7 @@ import CommentForm from '@/components/CommentForm.vue'
 import { useNewsStore } from '@/stores/newsStore'
 import { useNewsUtils } from '@/composables/useNewsUtils.js'
 import { useFavoritesStore } from '@/stores/favoritesStore'
+import { useCommentsStore } from '@/stores/commentsStore'
 import { useLikesStore } from '@/stores/likesStore'
 
 const route = useRoute()
@@ -89,6 +115,7 @@ const router = useRouter()
 const newsStore = useNewsStore()
 const { formatDate } = useNewsUtils()
 const favoritesStore = useFavoritesStore()
+const commentsStore = useCommentsStore()
 const likesStore = useLikesStore()
 
 const isLiked = computed(() => likesStore.isLiked(article.id))
@@ -99,6 +126,13 @@ const displayLikes = computed(() => {
 })
 const loading = ref(false)
 const error = ref(null)
+
+// Комментарии
+const commentsList = computed(() => {
+  if (!article.id) return []
+  commentsStore.hydrate()
+  return commentsStore.getCommentsByArticleId(article.id)
+})
 
 const article = reactive({
   id: null,
@@ -157,6 +191,12 @@ const loadArticle = async () => {
     }
 
     Object.assign(article, foundArticle || getMockArticle(articleId.value))
+    
+    // Обновляем счетчик комментариев из store
+    if (article.id) {
+      commentsStore.hydrate()
+      article.comments = commentsStore.getCommentCount(article.id)
+    }
   } catch (err) {
     error.value = 'Не удалось загрузить статью'
     console.error('Error loading article:', err)
@@ -191,9 +231,13 @@ const shareArticle = () => {
 }
 
 const handleCommentSubmit = (commentData) => {
-  console.log('Комментарий отправлен:', commentData)
-  // Здесь можно добавить логику сохранения комментария
-  article.comments = (article.comments || 0) + 1
+  if (!article.id) return
+
+  // Сохраняем комментарий в store
+  commentsStore.add(article.id, commentData)
+
+  // Обновляем счетчик комментариев
+  article.comments = commentsStore.getCommentCount(article.id)
 }
 
 const goBack = () => {
@@ -206,6 +250,7 @@ const goBack = () => {
 
 onMounted(() => {
   favoritesStore.hydrate()
+  commentsStore.hydrate()
   likesStore.hydrate()
   loadArticle()
 })
@@ -428,6 +473,68 @@ watch(
   margin-top: 3rem;
   padding-top: 2rem;
   border-top: 1px solid #e5e7eb;
+}
+
+.comments-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1.5rem;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.comment-item {
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.comment-author {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.comment-author strong {
+  color: #111827;
+  font-size: 1rem;
+}
+
+.comment-email {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.comment-date {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.comment-text {
+  color: #374151;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.no-comments {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  margin-bottom: 2rem;
 }
 
 .action-btn {
